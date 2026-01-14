@@ -4,7 +4,6 @@ pragma abicoder v2;
 
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
 import '@uniswap/lib/contracts/libraries/SafeERC20Namer.sol';
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 
 import './libraries/ChainId.sol';
 import './interfaces/INonfungiblePositionManager.sol';
@@ -16,7 +15,7 @@ import './libraries/TokenRatioSortOrder.sol';
 
 /// @title Describes NFT token positions
 /// @notice Produces a string containing the data URI for a JSON metadata string
-contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescriptor, Initializable {
+contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescriptor {
     // Core Stablecoins
     address private constant USDC  = 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E;
     address private constant USDT  = 0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7;
@@ -31,17 +30,10 @@ contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescript
     address private constant BTC   = 0x152b9d0FdC40C096757F570A51E494bd4b943E50;
     address private constant WETH   = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
 
-    address public WETH9;
-    /// @dev A null-terminated string
-    bytes32 public nativeCurrencyLabelBytes;
+    address public immutable WETH9;
+    bytes32 public immutable nativeCurrencyLabelBytes;
 
-    // constructor(address _WETH9, bytes32 _nativeCurrencyLabelBytes) {
-    //     WETH9 = _WETH9;
-    //     nativeCurrencyLabelBytes = _nativeCurrencyLabelBytes;
-    // }
-
-    // Proxy 방식에서는 생성자 대신 initialize를 사용
-    function initialize(address _WETH9, bytes32 _nativeCurrencyLabelBytes) public initializer {
+    constructor(address _WETH9, bytes32 _nativeCurrencyLabelBytes) {
         WETH9 = _WETH9;
         nativeCurrencyLabelBytes = _nativeCurrencyLabelBytes;
     }
