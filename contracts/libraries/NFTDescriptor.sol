@@ -112,7 +112,8 @@ library NFTDescriptor {
         return
             string(
                 abi.encodePacked(
-                    'This NFT represents a liquidity position in a Uniswap V3 ',
+                    // 'This NFT represents a liquidity position in a AquaBank V3 ',
+                    'This NFT represents a liquidity position in a AquaTest V3 ',
                     quoteTokenSymbol,
                     '-',
                     baseTokenSymbol,
@@ -160,7 +161,8 @@ library NFTDescriptor {
         return
             string(
                 abi.encodePacked(
-                    'Uniswap - ',
+                    // 'AquaBank - ',
+                    'AquaTest - ',
                     feeTier,
                     ' - ',
                     escapeQuotes(params.quoteTokenSymbol),
@@ -420,10 +422,10 @@ library NFTDescriptor {
                 tickSpacing: params.tickSpacing,
                 overRange: overRange(params.tickLower, params.tickUpper, params.tickCurrent),
                 tokenId: params.tokenId,
-                color0: tokenToColorHex(uint256(params.quoteTokenAddress), 136),
-                color1: tokenToColorHex(uint256(params.baseTokenAddress), 136),
-                color2: tokenToColorHex(uint256(params.quoteTokenAddress), 0),
-                color3: tokenToColorHex(uint256(params.baseTokenAddress), 0),
+                color0: aquaBrandColor(0),  // 브랜드 1
+                color1: aquaBrandColor(1),  // 브랜드 2
+                color2: tokenAccentColor(params.quoteTokenAddress), // 토큰 포인트
+                color3: tokenAccentColor(params.baseTokenAddress),  // 토큰 포인트
                 x1: scale(getCircleCoord(uint256(params.quoteTokenAddress), 16, params.tokenId), 0, 255, 16, 274),
                 y1: scale(getCircleCoord(uint256(params.baseTokenAddress), 16, params.tokenId), 0, 255, 100, 484),
                 x2: scale(getCircleCoord(uint256(params.quoteTokenAddress), 32, params.tokenId), 0, 255, 16, 274),
@@ -474,4 +476,26 @@ library NFTDescriptor {
     function sliceTokenHex(uint256 token, uint256 offset) internal pure returns (uint256) {
         return uint256(uint8(token >> offset));
     }
+
+    function aquaBrandColor(uint256 variant) internal pure returns (string memory) {
+        // 두 가지 블루 계열만 사용
+        if (variant % 2 == 0) {
+            return "0B3C5D"; // deep aqua
+        } else {
+            return "1E90FF"; // ocean blue
+        }
+    }
+
+    function tokenAccentColor(address token) internal pure returns (string memory) {
+        // 하위 1 byte만 사용 → 색상 폭 제한
+        uint256 v = uint256(uint160(token)) & 0xFF;
+
+        // 밝은 Aqua 계열로 clamp
+        uint256 base = 0x6EC6FF;
+        uint256 color = base + (v % 0x002020);
+
+        return (color).toHexStringNoPrefix(3);
+    }
+
+
 }

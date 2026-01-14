@@ -16,14 +16,21 @@ import './libraries/TokenRatioSortOrder.sol';
 /// @title Describes NFT token positions
 /// @notice Produces a string containing the data URI for a JSON metadata string
 contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescriptor {
-    address private constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    address private constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
-    address private constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
-    address private constant TBTC = 0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa;
-    address private constant WBTC = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
+    // Core Stablecoins
+    address private constant USDC  = 0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E;
+    address private constant USDT  = 0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7;
+    address private constant AUSD  = 0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a;
+
+    // Bridged Stablecoins
+    address private constant bUSDC = 0x038Dbe3D967bB8389190446DACdfE7B95b44F73D;
+    address private constant bUSDT = 0x3C594084dC7AB1864AC69DFd01AB77E8f65B83B7;
+    address private constant bAUSD = 0xd211b17Dfe8288D4Fb0dd8EEFF07A6C48fC679D5;
+
+    // Major Assets
+    address private constant BTC   = 0x152b9d0FdC40C096757F570A51E494bd4b943E50;
+    address private constant WETH   = 0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB;
 
     address public immutable WETH9;
-    /// @dev A null-terminated string
     bytes32 public immutable nativeCurrencyLabelBytes;
 
     constructor(address _WETH9, bytes32 _nativeCurrencyLabelBytes) {
@@ -101,21 +108,27 @@ contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescript
     }
 
     function tokenRatioPriority(address token, uint256 chainId) public view returns (int256) {
-        if (token == WETH9) {
+        if (token == WETH9) {    // Native token (AVAX)
             return TokenRatioSortOrder.DENOMINATOR;
         }
-        if (chainId == 1) {
+        if (chainId == 43114) {
+            // Core stables
             if (token == USDC) {
                 return TokenRatioSortOrder.NUMERATOR_MOST;
             } else if (token == USDT) {
                 return TokenRatioSortOrder.NUMERATOR_MORE;
-            } else if (token == DAI) {
+            } else if (token == AUSD) {
                 return TokenRatioSortOrder.NUMERATOR;
-            } else if (token == TBTC) {
+            
+            // Bridged stables (한 단계 낮게)
+            } else if (token == bUSDC || token == bUSDT || token == bAUSD) {     
+                return TokenRatioSortOrder.NUMERATOR;
+            // High value asset
+            } else if (token == BTC || token == WETH) {         
                 return TokenRatioSortOrder.DENOMINATOR_MORE;
-            } else if (token == WBTC) {
-                return TokenRatioSortOrder.DENOMINATOR_MOST;
             } else {
+                // CLAM / CORAL / 기타 자체 토큰
+                // → priority = 0 (의도적)
                 return 0;
             }
         }
